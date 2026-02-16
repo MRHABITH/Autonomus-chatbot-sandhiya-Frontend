@@ -1,0 +1,36 @@
+export interface ChatResponse {
+    reply: string;
+    sources: Source[];
+    escalated: boolean;
+    ticket_id?: string;
+}
+
+export interface Source {
+    title: string;
+    url: string;
+    snippet: string;
+    score: number;
+}
+
+// Use environment variable for production, fallback to dynamic hostname for local network dev
+const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
+
+export async function sendMessage(message: string, sessionId: string, userId: string = 'user-1'): Promise<ChatResponse> {
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: sessionId,
+            user_id: userId,
+            message: message,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    return response.json();
+}
