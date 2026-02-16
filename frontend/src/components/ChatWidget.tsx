@@ -36,11 +36,14 @@ export default function ChatWidget() {
                     sources: response.sources
                 }
             ]);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to send message:", error);
             setMessages((prev) => [
                 ...prev,
-                { sender: 'bot', text: "Sorry, I'm having trouble connecting to the server." }
+                {
+                    sender: 'bot',
+                    text: error.message || "Sorry, I'm having trouble connecting to the server."
+                }
             ]);
         } finally {
             setIsLoading(false);
