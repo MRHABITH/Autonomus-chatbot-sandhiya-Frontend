@@ -13,13 +13,16 @@ export interface Source {
 }
 
 // Use environment variable for production, fallback to your deployed Vercel backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://autonomus-chatbot-sandhiya-backend.vercel.app";
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://autonomus-chatbot-sandhiya-backend.vercel.app").replace(/\/$/, "");
 
 export async function sendMessage(message: string, sessionId: string, userId: string = 'user-1'): Promise<ChatResponse> {
+    console.log(`Attempting to fetch: ${API_BASE_URL}/chat`);
     const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
+        mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
         body: JSON.stringify({
             session_id: sessionId,
@@ -29,7 +32,8 @@ export async function sendMessage(message: string, sessionId: string, userId: st
     });
 
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorText = await response.text();
+        throw new Error(`Server Error (${response.status}): ${errorText || response.statusText}`);
     }
 
     return response.json();
